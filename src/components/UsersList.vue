@@ -1,10 +1,15 @@
 <template>
   <div class="user-list-container">
+    <div v-if="userStore.isLoading" class="loading-spinner-overlay">
+      <div class="loading-spinner"></div>
+    </div>
     <div v-if="userStore.hasError" class="error-message">
       <p>⚠️ Error: {{ userStore.error }}</p>
     </div>
     <div v-if="showUsersTable" class="users">
-      <p>Total Users: {{ userStore.userCount }}</p>
+      <div class="text-right">
+        <p>Total Users: {{ userStore.userCount }}</p>
+      </div>
       <table>
         <thead>
           <tr>
@@ -138,14 +143,14 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 10px 10px 1px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
     overflow: hidden;
 }
 
 
 thead {
-    background-color: #f2f2f2;
+    background-color: #89a8d0;
 }
 
 th {
@@ -171,7 +176,7 @@ tr:nth-child(even) {
 }
 
 tr:hover {
-    background-color: #e0e0e0;
+    background-color: #dbdde9;
     cursor: pointer;
 }
 
@@ -222,7 +227,7 @@ td small {
 }
 
 td button:not(.save-button):not(.cancel-button) {
-    background-color: #6c757d;
+    background-color: #1b6cb4;
     color: white;
 }
 td button:not(.save-button):not(.cancel-button):hover {
@@ -270,5 +275,32 @@ td button.cancel-button:hover {
   padding: 20px;
   color: #777;
   font-style: italic;
+}
+
+.loading-spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

@@ -4,9 +4,21 @@ import UsersList from '../components/UsersList.vue'
 <template>
   <main>
     <h1>Users</h1>
-    <UsersList />
+    <div class="users-view">
+      <UsersList />
+    </div>
   </main>
 </template>
 
 <style>
+
+main {
+  width: 100%;
+  min-height: 1000px;
+  background-color: #f4f4f4;
+  border-radius: 20px;
+  padding: 40px;
+  margin: 10px;
+  box-shadow: 0px 10px 25px 1px rgba(0, 0, 0, 0.3);
+}
 </style>
