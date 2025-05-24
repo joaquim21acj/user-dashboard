@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 
-const USERS_AMOUNT = 20
+const USERS_AMOUNT = 150
 
 const fakeApiCall = (minDelay = 500, maxDelay = 2000) => {
   const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
