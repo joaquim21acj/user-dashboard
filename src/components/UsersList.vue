@@ -3,58 +3,62 @@
     <div v-if="userStore.isLoading" class="loading-spinner-overlay">
       <div class="loading-spinner"></div>
     </div>
-    <div v-if="userStore.hasError" class="error-message">
+
+    <div v-if="userStore.hasError && !userStore.isLoading" class="error-message">
       <p>⚠️ Error: {{ userStore.error }}</p>
     </div>
-    <div v-if="showUsersTable" class="users">
-      <div class="text-right">
-        <p>Total Users: {{ userStore.userCount }}</p>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th class="text-left">Ranking</th>
-            <th class="text-left">Name</th>
-            <th class="text-left">Score</th>
-            <th class="text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in userStore.sortedUsers" :key="user.id" :class="{ 'highlighted-row': isRecentlyUpdated(user.id) }" >
-            <td class="text-left">
-              <div>
-                {{ user.rank }}
-              </div>
-              <template v-if="isRecentlyUpdated(user.id)">
-                <small>Recently Updated</small>
-              </template>
-            </td>
-            <td class="text-left">{{ user.name }}</td>
-            <td class="text-left column-score">
-              <template v-if="isEditMode(user.id)">
-                <input type="number" v-model.number="editedScore" />
-              </template>
-              <template v-else>
-                <span>{{ user.score }}</span>
-              </template>
-            </td>
-            <td class="text-left column-actions">
-              <template v-if="isEditMode(user.id)">
-                <button @click="saveScore(user)" class="save-button">Save</button>
-                <button @click="cancelEdit(user)" class="cancel-button">Cancel</button>
-              </template>
-              <template v-else>
-                <button @click="enterEditMode(user)">Edit</button>
-              </template>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <div v-if="showNoUsersMessage"
-      class="no-users-found">
-      <p>🤷 No users found or an issue occurred.</p>
+    <div v-if="!userStore.isLoading && !userStore.hasError">
+      <div class="filter-container" v-if="userStore.userCount > 0"> <input type="text" v-model="searchQuery" placeholder="Filter by name..." class="filter-input" />
+      </div> <div v-if="showUsersTable" class="users">
+        <p>Total Users in Store: {{ userStore.userCount }}</p> <p v-if="searchQuery && filteredAndSortedUsers.length !== userStore.userCount">
+          Showing: {{ filteredAndSortedUsers.length }} matching user(s)
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th class="text-left">Ranking</th>
+              <th class="text-left">Name</th>
+              <th class="text-left">Score</th>
+              <th class="text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in filteredAndSortedUsers" :key="user.id" :class="{ 'highlighted-row': isRecentlyUpdated(user.id) }" >
+              <td class="text-left">
+                <div>
+                  {{ user.rank }}
+                </div>
+                <template v-if="isRecentlyUpdated(user.id)">
+                  <small>Recently Updated</small>
+                </template>
+              </td>
+              <td class="text-left">{{ user.name }}</td>
+              <td class="text-left column-score">
+                <template v-if="isEditMode(user.id)">
+                  <input type="number" v-model.number="editedScore" />
+                </template>
+                <template v-else>
+                  <span>{{ user.score }}</span>
+                </template>
+              </td>
+              <td class="text-left column-actions">
+                <template v-if="isEditMode(user.id)">
+                  <button @click="saveScore(user)" class="save-button">Save</button>
+                  <button @click="cancelEdit(user)" class="cancel-button">Cancel</button>
+                </template>
+                <template v-else>
+                  <button @click="enterEditMode(user)">Edit</button>
+                </template>
+              </td>
+            </tr>
+            <tr v-if="userStore.userCount > 0 && filteredAndSortedUsers.length === 0 && searchQuery">
+              <td colspan="4" class="empty-state-cell">No users match your filter "{{ searchQuery }}".</td>
+            </tr>
+          </tbody>
+        </table>
+      </div> <div v-if="showNoUsersMessage" class="no-users-found"> <p>🤷 No users found or an issue occurred.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -72,6 +76,7 @@ const showUsersTable = computed(() => !userStore.isLoading && !userStore.hasErro
 const showNoUsersMessage = computed(() => !userStore.isLoading && !userStore.hasError && userStore.userCount === 0)
 const secondsToRefresh = 30
 let refreshInterval: ReturnType<typeof setInterval> | undefined
+const searchQuery = ref('');
 
 onMounted(async () => {
   if (userStore.userCount === 0) {
@@ -82,6 +87,19 @@ onMounted(async () => {
 
 onUnmounted(() => {
   stopRefreshingUsers()
+})
+
+const filteredAndSortedUsers = computed(() => {
+  const usersToFilter = userStore.sortedUsers
+  const query = searchQuery.value.toLowerCase().trim()
+
+  if (!query) {
+    return usersToFilter
+  }
+
+  return usersToFilter.filter(user =>
+    user.name.toLowerCase().includes(query)
+  )
 })
 
 const startRefreshingUsers = () => {
@@ -147,7 +165,6 @@ table {
     border-radius: 8px;
     overflow: hidden;
 }
-
 
 thead {
     background-color: #89a8d0;
@@ -297,6 +314,28 @@ td button.cancel-button:hover {
   width: 50px;
   height: 50px;
   animation: spin 1s linear infinite;
+}
+
+.filter-container {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.filter-input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.filter-input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 @keyframes spin {
