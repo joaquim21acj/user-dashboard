@@ -21,4 +21,11 @@ main {
   margin: 10px;
   box-shadow: 0px 10px 25px 1px rgba(0, 0, 0, 0.3);
 }
+
+@media (max-width: 768px) {
+  main {
+    padding: 20px;
+    margin: 0;
+  }
+}
 </style>

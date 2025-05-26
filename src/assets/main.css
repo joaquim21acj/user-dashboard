@@ -2,8 +2,8 @@
 
 #app {
   min-height: 100vh;
-  width: 90%;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 2rem;
   font-weight: normal;
 }
@@ -26,5 +26,11 @@ a,
   body {
     display: flex;
     place-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  #app {
+    padding: 0;
   }
 }
